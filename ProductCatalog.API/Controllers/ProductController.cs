@@ -28,6 +28,10 @@ public class ProductController : ControllerBase
         _logger = logger;
     }
     
+    /// <summary>
+    /// Створення нового товару
+    /// </summary>
+    /// <returns></returns>
     [HttpPost("products")]
     [ProducesResponseType(type: typeof(List<ValidationFailure>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -62,6 +66,10 @@ public class ProductController : ControllerBase
         }
     }
     
+    /// <summary>
+    /// Отримання списку товарів
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("products")]
     [ProducesResponseType(type: typeof(IEnumerable<ProductListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -83,6 +91,10 @@ public class ProductController : ControllerBase
         }
     }
     
+    /// <summary>
+    /// Отримання детальної інформації про товар по коду товару
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("products/{code}")]
     [ProducesResponseType(type: typeof(List<ValidationFailure>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(type: typeof(ProductDto), StatusCodes.Status200OK)]
@@ -118,6 +130,10 @@ public class ProductController : ControllerBase
         }
     }
     
+    /// <summary>
+    /// Редагування товару
+    /// </summary>
+    /// <returns></returns>
     [HttpPut("products")]
     [ProducesResponseType(type: typeof(List<ValidationFailure>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -153,6 +169,10 @@ public class ProductController : ControllerBase
         }
     }
     
+    /// <summary>
+    /// Видалення товару
+    /// </summary>
+    /// <returns></returns>
     [HttpDelete("products")]
     [ProducesResponseType(type: typeof(List<ValidationFailure>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]

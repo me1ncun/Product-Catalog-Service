@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using ProductCatalog.Application.MappingProfiles;
 using ProductCatalog.Application.Services;
 using ProductCatalog.Application.Services.Impl;
@@ -16,7 +17,29 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "Product Catalog API",
+        Description = "ASP.NET Core Web API для управління каталогом товарів",
+        Contact = new OpenApiContact
+        {
+            Name = "Denis Shapovalov",
+            Url = new Uri("https://www.linkedin.com/in/shapovalov-denis/")
+        }
+    });
+});
+
+builder.Services.AddSwaggerGen(options =>
+{
+    var basePath = AppContext.BaseDirectory;
+
+    var xmlPath = Path.Combine(basePath, "ProductCatalog.API.xml");
+    options.IncludeXmlComments(xmlPath);
+});
 
 // Registering Database
 builder.Services.AddDbContext<DatabaseContext>(options =>
