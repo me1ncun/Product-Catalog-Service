@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq.Expressions;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProductCatalog.Application.DTOs;
@@ -42,12 +43,44 @@ public class ProductService : IProductService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<ProductListDto>> GetProductsAsync()
+    public async Task<PagedList<ProductListDto>> GetProductsAsync(GetProductsDto request)
     {
-        var products = await _context.Products.ToListAsync();
-        
-        return _mapper.Map<List<ProductListDto>>(products);
+        IQueryable<Product> productsQuery = _context.Products;
+
+        if (request.SortOrder?.ToLower() == "desc")
+        {
+            productsQuery = productsQuery.OrderByDescending(GetSortProperty(request));
+        }
+        else
+        {
+            productsQuery = productsQuery.OrderBy(GetSortProperty(request));
+        }
+
+        var productResponsesQuery = productsQuery
+            .Select(p => new ProductListDto
+            {
+                Code = p.Code,
+                Name = p.Name,
+                Price = p.Price
+            });
+
+        var products = await PagedList<ProductListDto>.CreateAsync(
+            productResponsesQuery,
+            request.Page,
+            request.PageSize);
+
+        return products;
     }
+    
+    private static Expression<Func<Product, object>> GetSortProperty(GetProductsDto request) =>
+        request.SortColumn?.ToLower() switch
+        {
+            "name" => product => product.Name,
+            "code" => product => product.Code,
+            "description" => product => product.Description,
+            "price" => product => product.Price,
+            _ => product => product.Code
+        };
 
     public async Task UpdateProductAsync(ProductDto updateProductDto)
     {

@@ -73,13 +73,18 @@ public class ProductController : ControllerBase
     [HttpGet("products")]
     [ProducesResponseType(type: typeof(IEnumerable<ProductListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAllProducts()
+    public async Task<IActionResult> GetAllProducts(
+        string? searchTerm,
+        string? sortColumn,
+        string? sortOrder,
+        int page,
+        int pageSize)
     {
         try
         {
-            var products = await _productService.GetProductsAsync();
+            var products = await _productService.GetProductsAsync(new GetProductsDto(searchTerm, sortColumn, sortOrder, page, pageSize));
             
-            _logger.LogInformation($"Retrieved {products.Count()} products");
+            _logger.LogInformation($"Retrieved {products.Items.Count} products");
 
             return Ok(products);
         }

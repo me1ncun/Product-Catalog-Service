@@ -3,6 +3,7 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MockQueryable.Moq;
 using Moq;
 using ProductCatalog.Application.DTOs;
 using ProductCatalog.Application.Services;
@@ -82,19 +83,37 @@ public class ProductControllerTests
             Code = "1234-5678",
             Name = "Laptop",
             Price = 10.00M
-        } };
+        }};
+        
+        var request = new GetProductsDto
+        {
+            SearchItem = "Laptop",
+            SortOrder = "asc",
+            SortColumn = "code",
+            Page = 1,
+            PageSize = 10
+        };
+
+        var mockQueryable = products.AsQueryable().BuildMockDbSet();
+        
+        var pagedList = await PagedList<ProductListDto>.CreateAsync(mockQueryable.Object, request.Page, request.PageSize);
         
         _mockProductService
-            .Setup(s => s.GetProductsAsync())
-            .ReturnsAsync(products);
+            .Setup(s => s.GetProductsAsync(It.IsAny<GetProductsDto>()))
+            .ReturnsAsync(pagedList);
 
         // Act
-        var result = await _controller.GetAllProducts();
+        var result = await _controller.GetAllProducts(
+            request.SearchItem,
+            request.SortColumn,
+            request.SortOrder,
+            request.Page,
+            request.PageSize);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnedProducts = Assert.IsAssignableFrom<IEnumerable<ProductListDto>>(okResult.Value);
-        Assert.Single(returnedProducts);
+        var returnedProducts = Assert.IsAssignableFrom<PagedList<ProductListDto>>(okResult.Value);
+        Assert.Single(returnedProducts.Items);
     }
 
     [Fact]
